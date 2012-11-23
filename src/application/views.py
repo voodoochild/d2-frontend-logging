@@ -1,45 +1,72 @@
+import re
 import json
 from datetime import datetime
-from flask import request, make_response
+from flask import request, make_response, render_template, url_for, redirect
 from application import app
-# from models import ExampleModel
+from models import Error
 
 
 @app.route('/')
-def home():
-    return 'Hello'
+@app.route('/<environment>')
+def errors(environment=None):
+    environments = {
+        'code':    'http://discussion-app-code-env.elasticbeanstalk.com',
+        'qa':      'http://discussion-app-qa-env.elasticbeanstalk.com',
+        'release': 'http://discussion-app-rel-env.elasticbeanstalk.com',
+        'prod':    'http://discussion-app-env.elasticbeanstalk.com'
+    }
+
+    if environment is not None and environment not in environments.keys():
+        return redirect(url_for('errors', environment=None))
+
+    errors = Error.all().order('-time')
+
+    if environment in environments.keys():
+        errors.filter('host =', environments[environment])
+
+    response = make_response(render_template('log.html', errors=errors))
+    response.headers['Cache-Control'] = 'no-cache, max-age=0'
+    return response
 
 
 @app.route('/log')
 def log():
-    # example = ExampleModel(
-    #     example_name = form.example_name.data,
-    #     example_description = form.example_description.data,
-    #     added_by = users.get_current_user()
-    # )
-    # try:
-    #     example.put()
-    #     example_id = example.key().id()
-    #     flash(u'Example %s successfully saved.' % example_id, 'success')
-    #     return redirect(url_for('list_examples'))
-    # except CapabilityDisabledError:
-    #     flash(u'App Engine Datastore is currently in read-only mode.', 'info')
-    #     return redirect(url_for('list_examples'))
-
-    log_data = {
-        'user-agent': request.args.get('user-agent'),
+    log = {
+        'url': request.args.get('url'),
         'error': request.args.get('error'),
-        'url': request.args.get('where'),
-        'time': request.args.get('when')
+        'filename': request.args.get('filename'),
+        'line': request.args.get('line'),
+        'useragent': request.args.get('useragent'),
+        'time': request.args.get('time')
     }
 
-    if log_data.get('time'):
-        date = int(int(log_data['time']) / 1000)
-        date = datetime.fromtimestamp(date).strftime('%Y-%m-%d %H:%M:%S')
-        log_data['time'] = date
+    if log['url'] is not None:
+        match = re.findall('^http:\/\/[\w.:-]+', log['url'])
+        if match:
+            log['host'] = match[0]
+    else:
+        log['host'] = None
 
+    if log['line'] is not None:
+        log['line'] = int(log['line'])
+
+    if log['time'] is not None:
+        date = int(int(log['time']) / 1000)
+        log['time'] = datetime.fromtimestamp(date)
+
+    error = Error(
+        url=log['url'],
+        host=log['host'],
+        error=log['error'],
+        filename=log['filename'],
+        line=log['line'],
+        useragent=log['useragent'],
+        time=log['time']
+    )
+    error.put()
+
+    log['time'] = log['time'].strftime('%Y-%m-%d %H:%M:%S')
     response = make_response('{callback}({data})'.format(
-        callback=str(request.args.get('callback')),
-        data=json.dumps(log_data)))
+        callback=str(request.args.get('callback')), data=json.dumps(log)))
     response.mimetype = 'application/json'
     return response

@@ -6,3 +6,7 @@ if 'SERVER_SOFTWARE' in os.environ and os.environ['SERVER_SOFTWARE'].startswith(
     DEBUG_MODE = True
 
 DEBUG = DEBUG_MODE
+
+KNOWN_HOSTS = {
+    'code': 'http://discussion-app-code-env.elasticbeanstalk.com'
+}

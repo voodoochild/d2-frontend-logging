@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block body %}
+{% if errors.count() > 0 %}
+<ul>
+  {% for error in errors %}
+  <li>
+    <p>[{{ error.time }}] <b>{{ error.error}}</b> <i>{{ error.url }}</i></p>
+    {% if error.filename and error.line %}
+      <p>{{ error.filename }}, line {{ error.line }}</p>
+    {% endif %}
+    <p class="user-agent">{{ error.useragent }}</p>
+  </li>
+  {% endfor %}
+</ul>
+{% endif %}
+{% endblock %}

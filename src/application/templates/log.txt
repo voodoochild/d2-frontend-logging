@@ -1,0 +1,3 @@
+{% for error in errors %}
+"{{ error.error}}" {{ error.url }} "{{ error.useragent }}" {{ error.time }} [{{ error.filename }}:{{ error.line }}]
+{% endfor %}

@@ -1,4 +1,4 @@
-application: myflaskonappengineapp
+application: d2-frontend-logging
 version: 1
 runtime: python27
 api_version: 1
@@ -22,19 +22,7 @@ inbound_services:
 - warmup
 
 handlers:
-- url: /favicon.ico
-  static_files: application/static/img/favicon.ico
-  upload: application/static/img/favicon.ico
-
-- url: /robots.txt
-  static_files: application/static/robots.txt
-  upload: application/static/robots.txt
-
-- url: /_gae_mini_profiler/static
-  static_dir: flaskext/gae_mini_profiler/static
-
 - url: /static
   static_dir: application/static
-
 - url: .*
   script: application.app

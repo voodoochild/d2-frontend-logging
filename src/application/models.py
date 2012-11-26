@@ -8,4 +8,4 @@ class Error(db.Model):
     filename = db.StringProperty()
     line = db.IntegerProperty()
     useragent = db.StringProperty()
-    time = db.DateTimeProperty()
+    time = db.DateTimeProperty(auto_now_add=True)

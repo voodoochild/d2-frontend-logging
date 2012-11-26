@@ -1,6 +1,5 @@
 import re
 import json
-from datetime import datetime
 from flask import request, make_response, render_template, url_for, redirect
 from application import app
 from models import Error
@@ -13,7 +12,7 @@ def errors(environment=None):
         'code':    'http://discussion-app-code-env.elasticbeanstalk.com',
         'qa':      'http://discussion-app-qa-env.elasticbeanstalk.com',
         'release': 'http://discussion-app-rel-env.elasticbeanstalk.com',
-        'prod':    'http://discussion-app-env.elasticbeanstalk.com'
+        'prod':    'http://discussion.guardian.co.uk'
     }
 
     if environment is not None and environment not in environments.keys():
@@ -36,8 +35,7 @@ def log():
         'error': request.args.get('error'),
         'filename': request.args.get('filename'),
         'line': request.args.get('line'),
-        'useragent': request.args.get('useragent'),
-        'time': request.args.get('time')
+        'useragent': request.args.get('useragent')
     }
 
     if log['url'] is not None:
@@ -47,12 +45,11 @@ def log():
     else:
         log['host'] = None
 
+    if log['filename'] is not None:
+        log['filename'] = log['filename'][:500]
+
     if log['line'] is not None:
         log['line'] = int(log['line'])
-
-    if log['time'] is not None:
-        date = int(int(log['time']) / 1000)
-        log['time'] = datetime.fromtimestamp(date)
 
     error = Error(
         url=log['url'],
@@ -60,12 +57,10 @@ def log():
         error=log['error'],
         filename=log['filename'],
         line=log['line'],
-        useragent=log['useragent'],
-        time=log['time']
+        useragent=log['useragent']
     )
     error.put()
 
-    log['time'] = log['time'].strftime('%Y-%m-%d %H:%M:%S')
     response = make_response('{callback}({data})'.format(
         callback=str(request.args.get('callback')), data=json.dumps(log)))
     response.mimetype = 'application/json'

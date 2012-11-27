@@ -7,5 +7,5 @@ class Error(db.Model):
     error = db.StringProperty(multiline=True)
     filename = db.StringProperty()
     line = db.IntegerProperty()
-    useragent = db.StringProperty()
+    useragent = db.StringProperty(multiline=True)
     time = db.DateTimeProperty(auto_now_add=True)

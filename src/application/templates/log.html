@@ -1,7 +1,6 @@
 {% extends 'base.html' %}
 
 {% block body %}
-{% if errors.count() > 0 %}
 <ul>
   {% for error in errors %}
   <li>
@@ -13,5 +12,4 @@
   </li>
   {% endfor %}
 </ul>
-{% endif %}
 {% endblock %}

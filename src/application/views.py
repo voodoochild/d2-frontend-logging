@@ -23,6 +23,7 @@ def errors(environment=None):
     if environment in environments.keys():
         errors.filter('host =', environments[environment])
 
+    errors = errors.fetch(100)
     response = make_response(render_template('log.html', errors=errors))
     response.headers['Cache-Control'] = 'no-cache, max-age=0'
     return response
@@ -38,12 +39,11 @@ def log():
         'useragent': request.args.get('useragent')
     }
 
+    log['host'] = None
     if log['url'] is not None:
         match = re.findall('^http:\/\/[\w.:-]+', log['url'])
         if match:
             log['host'] = match[0]
-    else:
-        log['host'] = None
 
     if log['filename'] is not None:
         log['filename'] = log['filename'][:500]

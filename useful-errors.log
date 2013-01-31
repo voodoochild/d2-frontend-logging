@@ -1,0 +1,13 @@
+TypeError: 'undefined' is not a function (evaluating 't.match("omniture=")')
+
+Uncaught TypeError: Cannot call method 'match' of undefined
+
+Uncaught TypeError: Object #<Object> has no method 'match'
+
+this.textarea[0] is undefined
+
+Uncaught exception: TypeError: Cannot convert 'n.offset()' to object
+
+n.offset() is undefined
+
+Uncaught SyntaxError: Unexpected token var

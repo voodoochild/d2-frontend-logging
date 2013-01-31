@@ -9,10 +9,8 @@ from models import Error
 @app.route('/<environment>')
 def errors(environment=None):
     environments = {
-        'code':    'http://discussion-app-code-env.elasticbeanstalk.com',
-        'qa':      'http://discussion-app-qa-env.elasticbeanstalk.com',
-        'release': 'http://discussion-app-rel-env.elasticbeanstalk.com',
-        'prod':    'http://discussion.guardian.co.uk'
+        'release': 'http://d2.gurelease.co.uk',
+        'prod':    'http://d2.guardian.co.uk'
     }
 
     if environment is not None and environment not in environments.keys():
@@ -33,8 +31,8 @@ def errors(environment=None):
 def log():
     log = {
         'url': request.args.get('url'),
-        'error': request.args.get('error'),
-        'filename': request.args.get('filename'),
+        'error': request.args.get('error', ''),
+        'filename': request.args.get('filename', ''),
         'line': request.args.get('line'),
         'useragent': request.args.get('useragent')
     }
@@ -59,7 +57,12 @@ def log():
         line=log['line'],
         useragent=log['useragent']
     )
-    error.put()
+
+    script_error = log['error'] == 'Script error. window error'
+    chrome_extension = log['filename'].startswith('chrome://')
+
+    if not script_error and not chrome_extension:
+        error.put()
 
     response = make_response('{callback}({data})'.format(
         callback=str(request.args.get('callback')), data=json.dumps(log)))
